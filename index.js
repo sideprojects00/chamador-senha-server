@@ -4,16 +4,19 @@ const { Server } = require('socket.io')
 const cors = require('cors')
 require('dotenv').config()
 
-const PORT = process.env.PORT || 3000
+const PORT = 3000
 
 const app = express()
 
-app.use(
-  cors({
-    origin: "https://sideprojects00.github.io/",
-    methods: ['GET', 'POST']
-  })
-)
+const corsOptions = {
+    origin: 'https://sideprojects00.github.io', 
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true, 
+};
+
+app.use(cors(corsOptions));
+
 
 app.get('/', (req, res) => {
   res.send('Servidor Node.js rodando com HTTP!')
@@ -23,7 +26,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: "https://sideprojects00.github.io/", 
+    origin: 'https://sideprojects00.github.io', 
     methods: ['GET', 'POST']
   }
 })
