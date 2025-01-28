@@ -10,7 +10,7 @@ const app = express()
 
 app.use(
   cors({
-    origin: process.env.FRONT,
+    origin: "https://sideprojects00.github.io/",
     methods: ['GET', 'POST']
   })
 )
@@ -23,7 +23,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONT,
+    origin: "https://sideprojects00.github.io/", 
     methods: ['GET', 'POST']
   }
 })
@@ -33,14 +33,27 @@ let filaPreferencial = 1
 let senhaAtual = filaNormal
 let tipoAtual = 'Normal'
 
+const enviarEstadoAtualizado = () => {
+  io.emit('atualizarDados', {
+    current: {
+      num: senhaAtual,
+      type: tipoAtual
+    },
+    nextNormal: filaNormal,
+    nextPreferential: filaPreferencial
+  })
+}
+
 io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
-  socket.emit('estadoInicial', {
-    senhaAtual,
-    tipoAtual,
-    filaNormal,
-    filaPreferencial
+  socket.emit('atualizarDados', {
+    current: {
+      num: senhaAtual,
+      type: tipoAtual
+    },
+    nextNormal: filaNormal,
+    nextPreferential: filaPreferencial
   })
 
   socket.on('resetarContadores', () => {
@@ -50,40 +63,26 @@ io.on('connection', socket => {
     tipoAtual = 'Normal'
 
     console.log('Contadores resetados.')
-    io.emit('estadoAtualizado', {
-      senhaAtual,
-      tipoAtual,
-      filaNormal,
-      filaPreferencial
-    })
+    enviarEstadoAtualizado()
   })
 
-  socket.on('chamarProximaNormal', () => {
-    senhaAtual = filaNormal
-    tipoAtual = 'Normal'
-    filaNormal++
+  socket.on('chamarProxima', ({ type }) => {
+    if (type === 'Normal') {
+      senhaAtual = filaNormal
+      tipoAtual = 'Normal'
+      filaNormal++
+      console.log(`Senha normal chamada: ${senhaAtual}`)
+    } else if (type === 'Preferencial') {
+      senhaAtual = filaPreferencial
+      tipoAtual = 'Preferencial'
+      filaPreferencial++
+      console.log(`Senha preferencial chamada: ${senhaAtual}`)
+    } else {
+      console.log('Tipo de senha inválido recebido:', type)
+      return
+    }
 
-    console.log(`Senha normal chamada: ${senhaAtual}`)
-    io.emit('estadoAtualizado', {
-      senhaAtual,
-      tipoAtual,
-      filaNormal,
-      filaPreferencial
-    })
-  })
-
-  socket.on('chamarProximaPreferencial', () => {
-    senhaAtual = filaPreferencial
-    tipoAtual = 'Preferencial'
-    filaPreferencial++
-
-    console.log(`Senha preferencial chamada: ${senhaAtual}`)
-    io.emit('estadoAtualizado', {
-      senhaAtual,
-      tipoAtual,
-      filaNormal,
-      filaPreferencial
-    })
+    enviarEstadoAtualizado()
   })
 
   socket.on('disconnect', () => {
