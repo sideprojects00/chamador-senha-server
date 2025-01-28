@@ -1,0 +1,25 @@
+# Node modules
+/node_modules/
+
+# Arquivos de log
+*.log
+npm-debug.log*
+
+# Arquivos temporários criados pelo editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependências e arquivos de build
+/dist/
+build/
+
+# Arquivos de configuração do ambiente
+.env
+
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+package-lock.json
