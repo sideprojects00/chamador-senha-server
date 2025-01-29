@@ -2,11 +2,13 @@ const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
 const cors = require('cors')
+const session = require('express-session') // Importar express-session
 require('dotenv').config()
 
 const PORT = process.env.PORT || 3000
 
 const app = express()
+
 
 const corsOptions = {
   origin: 'https://sideprojects00.github.io',
@@ -16,6 +18,16 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions))
+
+const crypto = require('crypto');
+const chaveSegura = crypto.randomBytes(64).toString('hex');
+
+app.use(session({
+  secret: chaveSegura,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true } 
+}))
 
 let logged = false
 
@@ -58,6 +70,8 @@ const adicionarAoHistorico = (senha, tipo) => {
 io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
+  const isLoggedIn = socket.handshake.query.logged === 'true'
+
   socket.emit('estadoAtualizado', {
     senhaAtual,
     tipoAtual,
@@ -93,19 +107,23 @@ io.on('connection', socket => {
     enviarEstadoAtualizado()
   })
 
-  socket.emit('checkLoginStatus', logged)
+  socket.emit('checkLoginStatus', isLoggedIn)
 
   socket.on('validarLogin', ({ username, password }) => {
     if (username === 'recepcionista' && password === '2025gii') {
       logged = true 
-      socket.emit('loginResult', true) 
+
+      socket.request.session.loggedIn = true
+      socket.request.session.save(() => {
+        socket.emit('loginResult', true)
+      })
     } else {
       socket.emit('loginResult', false) 
     }
   })
 
   socket.on('checkLogin', () => {
-    socket.emit('checkLoginStatus', logged) 
+    socket.emit('checkLoginStatus', logged)
   })
 
   socket.on('disconnect', () => {
