@@ -17,24 +17,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-const users = {
-  recepcionista: 'senha123'
-}
-
-app.post('/login', (req, res) => {
-  let body = '';
-  req.on('data', chunk => { body += chunk; });
-  req.on('end', () => {
-    const { username, password } = JSON.parse(body);
-
-    if (users[username] && users[username] === password) {
-      res.status(200).send({ message: 'Login bem-sucedido' });
-    } else {
-      res.status(401).send({ message: 'Usuário ou senha incorretos' });
-    }
-  });
-});
-
+let logged = false
 
 app.get('/', (req, res) => {
   res.send('Servidor Node.js rodando com HTTP!')
@@ -66,7 +49,7 @@ const enviarEstadoAtualizado = () => {
 }
 
 const adicionarAoHistorico = (senha, tipo) => {
-  historicoSenhas.unshift({ senha, tipo }) 
+  historicoSenhas.unshift({ senha, tipo })
   if (historicoSenhas.length > 7) {
     historicoSenhas.pop()
   }
@@ -108,6 +91,21 @@ io.on('connection', socket => {
     adicionarAoHistorico(senhaAtual, tipoAtual)
     filaPreferencial++
     enviarEstadoAtualizado()
+  })
+
+  socket.emit('checkLoginStatus', logged)
+
+  socket.on('validarLogin', ({ username, password }) => {
+    if (username === 'recepcionista' && password === '2025gii') {
+      logged = true 
+      socket.emit('loginResult', true) 
+    } else {
+      socket.emit('loginResult', false) 
+    }
+  })
+
+  socket.on('checkLogin', () => {
+    socket.emit('checkLoginStatus', logged) 
   })
 
   socket.on('disconnect', () => {
