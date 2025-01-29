@@ -17,6 +17,25 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
+const users = {
+  recepcionista: 'senha123'
+}
+
+app.post('/login', (req, res) => {
+  let body = '';
+  req.on('data', chunk => { body += chunk; });
+  req.on('end', () => {
+    const { username, password } = JSON.parse(body);
+
+    if (users[username] && users[username] === password) {
+      res.status(200).send({ message: 'Login bem-sucedido' });
+    } else {
+      res.status(401).send({ message: 'Usuário ou senha incorretos' });
+    }
+  });
+});
+
+
 app.get('/', (req, res) => {
   res.send('Servidor Node.js rodando com HTTP!')
 })
