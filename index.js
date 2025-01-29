@@ -111,9 +111,7 @@ io.on('connection', socket => {
   })
 
   socket.on('validarLogin', ({ username, password }) => {
-    console.log(username)
-    console.log(password)
-    if (username === 'recepcionista' && password === 'gghhpp') {
+    if (username == 'recepcionista' && password == 'gghhpp') {
       const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' })
       socket.emit('loginResult', { success: true, token })
     } else {
