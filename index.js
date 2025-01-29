@@ -34,14 +34,23 @@ let filaNormal = 1
 let filaPreferencial = 1
 let senhaAtual = filaNormal
 let tipoAtual = 'Normal'
+let historicoSenhas = []
 
 const enviarEstadoAtualizado = () => {
   io.emit('estadoAtualizado', {
     senhaAtual,
     tipoAtual,
     filaNormal,
-    filaPreferencial
+    filaPreferencial,
+    historicoSenhas
   })
+}
+
+const adicionarAoHistorico = (senha, tipo) => {
+  historicoSenhas.unshift({ senha, tipo }) 
+  if (historicoSenhas.length > 7) {
+    historicoSenhas.pop()
+  }
 }
 
 io.on('connection', socket => {
@@ -51,7 +60,8 @@ io.on('connection', socket => {
     senhaAtual,
     tipoAtual,
     filaNormal,
-    filaPreferencial
+    filaPreferencial,
+    historicoSenhas
   })
 
   socket.on('resetarContadores', () => {
@@ -67,16 +77,16 @@ io.on('connection', socket => {
   socket.on('chamarProximaNormal', () => {
     senhaAtual = filaNormal
     tipoAtual = 'Normal'
+    adicionarAoHistorico(senhaAtual, tipoAtual)
     filaNormal++
-    console.log(`Senha normal chamada: ${senhaAtual}`)
     enviarEstadoAtualizado()
   })
 
   socket.on('chamarProximaPreferencial', () => {
     senhaAtual = filaPreferencial
     tipoAtual = 'Preferencial'
+    adicionarAoHistorico(senhaAtual, tipoAtual)
     filaPreferencial++
-    console.log(`Senha preferencial chamada: ${senhaAtual}`)
     enviarEstadoAtualizado()
   })
 
