@@ -110,6 +110,8 @@ io.on('connection', socket => {
   socket.emit('checkLoginStatus', isLoggedIn)
 
   socket.on('validarLogin', ({ username, password }) => {
+    console.log(username)
+    console.log(password)
     if (username === 'recepcionista' && password === 'gghhpp') {
       logged = true 
 
