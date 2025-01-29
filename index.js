@@ -2,13 +2,12 @@ const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
 const cors = require('cors')
-const session = require('express-session') // Importar express-session
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const PORT = process.env.PORT || 3000
 
 const app = express()
-
 
 const corsOptions = {
   origin: 'https://sideprojects00.github.io',
@@ -19,15 +18,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-const crypto = require('crypto');
-const chaveSegura = crypto.randomBytes(64).toString('hex');
-
-app.use(session({
-  secret: chaveSegura,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true } 
-}))
+const secretKey = process.env.JWT_SECRET_KEY || 'yourSecretKey'
 
 let logged = false
 
@@ -70,7 +61,17 @@ const adicionarAoHistorico = (senha, tipo) => {
 io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
-  const isLoggedIn = socket.handshake.query.logged === 'true'
+  const token = socket.handshake.query.token
+  let isLoggedIn = false
+
+  if (token) {
+    try {
+      jwt.verify(token, secretKey)
+      isLoggedIn = true
+    } catch (err) {
+      console.log('Token inválido:', err)
+    }
+  }
 
   socket.emit('estadoAtualizado', {
     senhaAtual,
@@ -79,6 +80,8 @@ io.on('connection', socket => {
     filaPreferencial,
     historicoSenhas
   })
+
+  socket.emit('checkLoginStatus', isLoggedIn)
 
   socket.on('resetarContadores', () => {
     filaNormal = 1
@@ -107,20 +110,14 @@ io.on('connection', socket => {
     enviarEstadoAtualizado()
   })
 
-  socket.emit('checkLoginStatus', isLoggedIn)
-
   socket.on('validarLogin', ({ username, password }) => {
     console.log(username)
     console.log(password)
     if (username === 'recepcionista' && password === 'gghhpp') {
-      logged = true 
-
-      socket.request.session.loggedIn = true
-      socket.request.session.save(() => {
-        socket.emit('loginResult', true)
-      })
+      const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' })
+      socket.emit('loginResult', { success: true, token })
     } else {
-      socket.emit('loginResult', false) 
+      socket.emit('loginResult', { success: false })
     }
   })
 
