@@ -69,6 +69,7 @@ io.on('connection', socket => {
     filaPreferencial = 1
     senhaAtual = filaNormal
     tipoAtual = 'Normal'
+    historicoSenhas = []
 
     console.log('Contadores resetados.')
     enviarEstadoAtualizado()
