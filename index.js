@@ -58,6 +58,9 @@ io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
   socket.on('login', ({ username, password }) => {
+    console.log("Login chamado!")
+    console.log(username)
+    console.log(password)
     if (username === 'admin' && password === '1234') {
       const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' })
       socket.emit('loginSuccess', { token })
