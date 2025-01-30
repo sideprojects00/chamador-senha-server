@@ -83,6 +83,10 @@ io.on('connection', socket => {
 
   socket.emit('checkLoginStatus', isLoggedIn)
 
+  if (!isLoggedIn) {
+    socket.disconnect(); 
+  }
+
   socket.on('resetarContadores', () => {
     filaNormal = 1
     filaPreferencial = 1
