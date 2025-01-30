@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const PORT = process.env.PORT || 3000
+const SECRET_KEY = 'b9be05160dcb4da794c0ea8351eb7456c03c6c3f2bf29d490b8aab0e968de130'
 
 const app = express()
 
@@ -18,16 +19,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-const secretKey = process.env.JWT_SECRET_KEY || 'yourSecretKey'
-
-let logged = false
-
-app.get('/', (req, res) => {
-  res.send('Servidor Node.js rodando com HTTP!')
-})
-
 const server = http.createServer(app)
-
 const io = new Server(server, {
   cors: {
     origin: 'https://sideprojects00.github.io',
@@ -61,31 +53,23 @@ const adicionarAoHistorico = (senha, tipo) => {
 io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
-  const token = socket.handshake.query.token
-  let isLoggedIn = false
-
-  if (token) {
-    try {
-      jwt.verify(token, secretKey)
-      isLoggedIn = true
-    } catch (err) {
-      console.log('Token inválido:', err)
+  socket.on('login', ({ username, password }) => {
+    if (username === 'admin' && password === '1234') {
+      const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' })
+      socket.emit('loginSuccess', { token })
+    } else {
+      socket.emit('loginError', 'Usuário ou senha incorretos!')
     }
-  }
-
-  socket.emit('estadoAtualizado', {
-    senhaAtual,
-    tipoAtual,
-    filaNormal,
-    filaPreferencial,
-    historicoSenhas
   })
 
-  socket.emit('checkLoginStatus', isLoggedIn)
-
-  if (!isLoggedIn) {
-    socket.disconnect(); 
-  }
+  socket.on('authenticate', ({ token }) => {
+    try {
+      const decoded = jwt.verify(token, SECRET_KEY)
+      socket.emit('authSuccess')
+    } catch (err) {
+      socket.emit('authError', 'Token inválido ou expirado!')
+    }
+  })
 
   socket.on('resetarContadores', () => {
     filaNormal = 1
@@ -93,8 +77,6 @@ io.on('connection', socket => {
     senhaAtual = filaNormal
     tipoAtual = 'Normal'
     historicoSenhas = []
-
-    console.log('Contadores resetados.')
     enviarEstadoAtualizado()
   })
 
@@ -112,21 +94,6 @@ io.on('connection', socket => {
     adicionarAoHistorico(senhaAtual, tipoAtual)
     filaPreferencial++
     enviarEstadoAtualizado()
-  })
-
-  socket.on('validarLogin', ({ username, password }) => {
-    console.log(username)
-    console.log(password)
-    if (username == 'recepcionista' && password == 'gghhpp') {
-      const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' })
-      socket.emit('loginResult', { success: true, token })
-    } else {
-      socket.emit('loginResult', { success: false })
-    }
-  })
-
-  socket.on('checkLogin', () => {
-    socket.emit('checkLoginStatus', logged)
   })
 
   socket.on('disconnect', () => {
