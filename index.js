@@ -62,9 +62,9 @@ io.on('connection', socket => {
     console.log('Login chamado!')
     console.log(username)
     console.log(password)
-    if (username === 'admin' && password === '1234') {
+    if (username === 'admin' && password === '2025gii') {
       console.log('login aceito')
-      const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' })
+      const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '10h' })
 
       socket.emit('loginSuccess', { token })
       io.emit('loginResponse', {
