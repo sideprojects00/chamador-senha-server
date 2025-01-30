@@ -62,9 +62,11 @@ io.on('connection', socket => {
     console.log(username)
     console.log(password)
     if (username === 'admin' && password === '1234') {
+      console.log("login aceito")
       const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' })
       socket.emit('loginSuccess', { token })
     } else {
+      console.log("login negado")
       socket.emit('loginError', 'Usuário ou senha incorretos!')
     }
   })
