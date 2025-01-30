@@ -19,6 +19,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
+app.get('/', (req, res) => {
+  res.send('Servidor Node.js rodando com HTTP!')
+})
+
 const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
