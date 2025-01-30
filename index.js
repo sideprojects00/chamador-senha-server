@@ -5,7 +5,7 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-const PORT = process.env.PORT || 3000
+const PORT = 3000
 const SECRET_KEY = 'b9be05160dcb4da794c0ea8351eb7456c03c6c3f2bf29d490b8aab0e968de130'
 
 const app = express()
