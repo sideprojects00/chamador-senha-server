@@ -5,8 +5,9 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-const PORT = process.env.PORT || 3000;
-const SECRET_KEY = 'b9be05160dcb4da794c0ea8351eb7456c03c6c3f2bf29d490b8aab0e968de130'
+const PORT = process.env.PORT || 3000
+const SECRET_KEY =
+  'b9be05160dcb4da794c0ea8351eb7456c03c6c3f2bf29d490b8aab0e968de130'
 
 const app = express()
 
@@ -58,19 +59,19 @@ io.on('connection', socket => {
   console.log('Novo cliente conectado:', socket.id)
 
   socket.on('login', ({ username, password }) => {
-    console.log("Login chamado!")
+    console.log('Login chamado!')
     console.log(username)
     console.log(password)
     if (username === 'admin' && password === '1234') {
-      console.log("login aceito")
+      console.log('login aceito')
       const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' })
 
       socket.emit('loginSuccess', { token })
       io.emit('loginResponse', {
-        token,
+        token
       })
     } else {
-      console.log("login negado")
+      console.log('login negado')
       socket.emit('loginError', 'Usuário ou senha incorretos!')
     }
   })
@@ -82,6 +83,14 @@ io.on('connection', socket => {
     } catch (err) {
       socket.emit('authError', 'Token inválido ou expirado!')
     }
+  })
+
+  socket.emit('estadoAtualizado', {
+    senhaAtual,
+    tipoAtual,
+    filaNormal,
+    filaPreferencial,
+    historicoSenhas
   })
 
   socket.on('resetarContadores', () => {
