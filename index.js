@@ -100,8 +100,8 @@ io.on('connection', socket => {
   socket.on('resetarContadores', () => {
     filaNormal = 1
     filaPreferencial = 1
-    senhaAtual = filaNormal
-    tipoAtual = 'Normal'
+    senhaAtual = filaPreferencial
+    tipoAtual = 'Preferencial'
     historicoSenhas = []
     enviarEstadoAtualizado()
   })
