@@ -118,6 +118,10 @@ io.on('connection', socket => {
     enviarEstadoAtualizado()
   })
 
+  socket.on('keepAlive', () => {
+    console.log("Keep alive function")
+  })
+
   socket.on('disconnect', () => {
     console.log('Cliente desconectado:', socket.id)
   })
