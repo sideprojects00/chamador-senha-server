@@ -50,7 +50,7 @@ const enviarEstadoAtualizado = () => {
 
 const adicionarAoHistorico = (senha, tipo) => {
   historicoSenhas.unshift({ senha, tipo })
-  if (historicoSenhas.length > 7) {
+  if (historicoSenhas.length > 10) {
     historicoSenhas.pop()
   }
 }
