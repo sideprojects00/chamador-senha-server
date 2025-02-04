@@ -93,6 +93,10 @@ io.on('connection', socket => {
     historicoSenhas
   })
 
+  socket.on('rechamarSenha', () => {
+    io.emit('rechamarSenha', {})
+  })
+
   socket.on('resetarContadores', () => {
     filaNormal = 1
     filaPreferencial = 1
