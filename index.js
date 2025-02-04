@@ -34,8 +34,8 @@ const io = new Server(server, {
 
 let filaNormal = 1
 let filaPreferencial = 1
-let senhaAtual = filaNormal
-let tipoAtual = 'Normal'
+let senhaAtual = filaPreferencial
+let tipoAtual = 'Preferencial'
 let historicoSenhas = []
 
 const enviarEstadoAtualizado = () => {
